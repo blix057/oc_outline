@@ -1,0 +1,46 @@
+services:
+  outline:
+    image: outlinewiki/outline:latest
+    container_name: outline
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    env_file: .env
+    depends_on:
+      - outline-postgres
+      - outline-redis
+    networks:
+      - outline-net
+    volumes:
+      - outline_data:/var/lib/outline/data
+
+  outline-postgres:
+    image: postgres:16-alpine
+    container_name: outline-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: outline
+      POSTGRES_USER: outline
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - outline-net
+    volumes:
+      - outline_postgres:/var/lib/postgresql/data
+
+  outline-redis:
+    image: redis:7-alpine
+    container_name: outline-redis
+    restart: unless-stopped
+    networks:
+      - outline-net
+    volumes:
+      - outline_redis:/data
+
+networks:
+  outline-net:
+    driver: bridge
+
+volumes:
+  outline_data:
+  outline_postgres:
+  outline_redis:
